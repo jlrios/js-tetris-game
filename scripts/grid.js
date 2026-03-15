@@ -1,3 +1,5 @@
+import { Tetromino } from "./tetromino.js";
+
 export class Grid {
   constructor(canvas, rows, cols, cellSize, space) {
     this.canvas = canvas;
@@ -12,6 +14,7 @@ export class Grid {
     // Canvas size.
     this.canvas.width = this.cols * this.cellSize + (this.space * this.cols);
     this.canvas.height = this.rows * this.cellSize + (this.space * this.rows);
+    this.block = new Tetromino(this.canvas, this.cellSize);
   }
 
   restartMatrix() {
@@ -23,8 +26,8 @@ export class Grid {
     }
   }
 
-  drawSquareField(x, y, side, color, borderColor) {
-    const borderSize = side / 10;
+  drawSquareField(x, y, side, color, borderColor, border) {
+    const borderSize = side / border;
     this.context.fillStyle = color;
     this.context.fillRect(x, y, side, side);
     this.context.strokeStyle = borderColor;
@@ -40,10 +43,37 @@ export class Grid {
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.cols; c++) {
         const position = this.getCoordinates(c, r);
-        this.drawSquareField(position.x, position.y, this.cellSize, "#000", "#303030")
+        if (this.matrix[r][c] !== 0) {
+          this.block.drawBlock(position.x, position.y, this.matrix[r][c]);
+        } else {
+          this.drawSquareField(position.x, position.y, this.cellSize, "#000", "#303030", 10);
+        }
       }
     }
     this.printMatrix();
+  }
+
+  draw2() {
+    this.drawBackground();
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        const position = this.getCoordinates(c, r);
+        if (this.matrix[r][c] !== 0) {
+          if (this.matrix[r][c] === 2) {
+            this.block.drawBlock(position.x + this.cellSize, position.y, this.matrix[r][c]);
+          } else if (this.matrix[r][c] === 3) {
+            this.block.drawBlock(position.x, position.y, this.matrix[r][c]);
+          } else {
+            this.block.drawBlock(position.x + this.cellSize / 2, position.y, this.matrix[r][c]);
+          }
+        } 
+      }
+    }
+  }
+
+  drawBackground() {
+    this.context.fillStyle = "black";
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   printMatrix() {
@@ -51,6 +81,6 @@ export class Grid {
     this.matrix.forEach((row) => {
       text += row.join(" ") + "\n";
     });
-    console.log(text)
+    // console.log(text)
   }
 }
